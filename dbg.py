@@ -200,10 +200,7 @@ def main():
     
     dB = build(args.B, args.k, 1)
     d = merge_dicts(dA, dB)
-    # with open('dict_of_ratio_1.txt', "w+") as f:
-    #     f.write(str(d))
     G,cs = all_contigs(d,args.k)
-    # print(cs)
     write_GFA2(G,cs,args.k,d)
 
 
