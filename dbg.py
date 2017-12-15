@@ -1,6 +1,7 @@
 # code taken from https://raw.githubusercontent.com/pmelsted/dbg/master/dbg.py
 
 # import multiprocessing as mp
+import argparse
 import collections, sys
 from Bio import Seq, SeqIO, SeqRecord
 
@@ -192,4 +193,4 @@ if __name__ == "__main__":
     with open('dict_of_ratio_1.txt', "w+") as f:
         f.write(str(d))
     G,cs = all_contigs(d,k)
-write_GFA2(G,cs,k,d)
+    write_GFA2(G,cs,k,d)
