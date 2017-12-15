@@ -2,7 +2,7 @@
 
 # import multiprocessing as mp
 import argparse
-import collections, sys
+import collections
 from Bio import Seq, SeqIO, SeqRecord
 
 #  Create reverse complement
@@ -26,23 +26,23 @@ def bw(km):
 
 # count kmers and build dictionary with counts
 # use limit as cut off of very down regulated seq 
-def build(f,k=31,limit=1):
+def build(fn,k=31,limit=1):
     d = collections.defaultdict(int)
 
     # For each filename in input parse fast.q file 
-    # for f in fn:
-    reads = SeqIO.parse(f,'fastq')
-    # Extract reads 
-    for read in reads:
-        seq_s = str(read.seq)
-        seq_l = seq_s.split('N')
-        # 
-        for seq in seq_l:
-            for km in kmers(seq,k):
-                d[km] +=1
-            seq = twin(seq)
-            for km in kmers(seq,k):
-                d[km] += 1
+    for f in fn:
+        reads = SeqIO.parse(f,'fastq')
+        # Extract reads 
+        for read in reads:
+            seq_s = str(read.seq)
+            seq_l = seq_s.split('N')
+            # 
+            for seq in seq_l:
+                for km in kmers(seq,k):
+                    d[km] +=1
+                seq = twin(seq)
+                for km in kmers(seq,k):
+                    d[km] += 1
 
  # Remove k-mer elements of dict that
     d1 = [x for x in d if d[x] <= limit]
@@ -143,54 +143,78 @@ def kmer_count2(cs,d, k, id, file):
 def kmer_count(cs,d, k, id, file):
     for x in range(0,len(cs)+1-k):
         key = cs[x:x+k]
-        # "F 1 * 0 538 1 32 ATGCGCTCGCTCGCTGAGCTGAC A:i:234" 
+        count = d[key]
+        # write the fragment twice for organism A and maybe B
+        # <fragment> <- F <sid:id> <external:ref> <sbeg:pos> <send:pos> <fbeg:pos> <fend:pos> <alignment> <tag>*
         file.write("F\t%s\tA:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][0],len(cs),x,x+k,key))
+        
         file.write("F\t%s\tB:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][1],len(cs),x,x+k,key))
 
 # Write to line
-def write_GFA2(G,cs,k,d):
-    filename = "test.gfa"
-    with open(filename, "w+") as file:
+def write_GFA2(G,cs,k,d): 
+    global args
+    if args.output:                                             # If the output file name is given use it
+        filename = args.output
+    else:                                                       # else use standard one
+        filename = "output.gfa"
         
-        file.write("H  VN:Z:2.0\n")
-        for i,x in enumerate(cs):
-            file.write("S\t%d\t%d\t%s\t\n"%(i,len(x), x ))
-            kmer_count(x,d,k,i,file)
+    with open(filename, "w+") as file:                          # Open a file
+        
+        file.write("H  VN:Z:2.0\n")                             # Write the header with the GFA version
+        for i,x in enumerate(cs):                               # Get the one contig and a number id for the contig
+            file.write("S\t%d\t%d\t%s\t\n"%(i,len(x), x ))      # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
+            kmer_count(x,d,k,i,file)                            # Function to get the fragments of organism A and B if included
 
-        for i in G:
+        for i in G:                                             # Write the links
             for j,o in G[i][0]:
                 file.write("L\t%d\t+\t%d\t%s\t%dM\n"%(i,j,o,k-1))
             for j,o in G[i][1]:
                 file.write("L\t%d\t-\t%d\t%s\t%dM\n"%(i,j,o,k-1))
-
+         
         for i in d.keys(): 
-            file.write("#\t%s\tRC A:%d B:%d\n"%(i,d[i][0],d[i][1])) 
+            file.write("#\t%s\tRC A:%d B:%d\n"%(i,d[i][0],d[i][1]))      # Print the dictionary with the count of how many times it kmer appears               
+        
 
-def write_GFA(G,cs,k,d):
-    filename = "test.gfa"
-    with open(filename, "w+") as file:
-        file.write("H  VN:Z:1.0")
-        for i,x in enumerate(cs):
-            print("S\t%d\t%s\t*\n"%(i,x))
+# def print_GFA(G,cs,k,d):
+
+#     with open(filename, "w+") as file:
+#         file.write("H  VN:Z:1.0")
+#         for i,x in enumerate(cs):
+#             print("S\t%d\t%s\t*\n"%(i,x))
             
-        for i in G:
-            for j,o in G[i][0]:
-                print("L\t%d\t+\t%d\t%s\t%dM\n"%(i,j,o,k-1))
-            for j,o in G[i][1]:
-                print("L\t%d\t-\t%d\t%s\t%dM\n"%(i,j,o,k-1))
+#         for i in G:
+#             for j,o in G[i][0]:
+#                 print("L\t%d\t+\t%d\t%s\t%dM\n"%(i,j,o,k-1))
+#             for j,o in G[i][1]:
+#                 print("L\t%d\t-\t%d\t%s\t%dM\n"%(i,j,o,k-1))
 
-        for i in d.keys(): 
-            print("#\t%s\tRC A:%d B:%d"%(i,d[i][0],d[i][1])) 
+#         for i in d.keys(): 
+#             print("#\t%s\tRC A:%d B:%d"%(i,d[i][0],d[i][1])) 
+
+
+
+def main():
+    global args
+
+    dA = build(args.A, args.k, 1)
+    
+    dB = build(args.B, args.k, 1)
+    d = merge_dicts(dA, dB)
+    # with open('dict_of_ratio_1.txt', "w+") as f:
+    #     f.write(str(d))
+    G,cs = all_contigs(d,args.k)
+    # print(cs)
+    write_GFA2(G,cs,args.k,d)
+
+
+parser = argparse.ArgumentParser(description="Creates a GFA file with one or two organisms given a kmer size")
+parser.add_argument("-k", type=int, required=True, help="the kmer size")
+parser.add_argument("-A", nargs='+', required=True, help="Organism_A_files")
+parser.add_argument("-B", nargs='+', required=True, help="Organism_B_files")
+parser.add_argument("-output",required=False,help="Output GFA file name")
+args = parser.parse_args()
+
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3: exit("args: <k> <reads_1.fq> ...")
-    k = int(sys.argv[1])
-    # d = build(sys.argv[2:], k, 1)
-    dA = build(sys.argv[2], k, 1)
-    dB = build(sys.argv[3], k, 1)
-    d = merge_dicts(dA, dB)
-    with open('dict_of_ratio_1.txt', "w+") as f:
-        f.write(str(d))
-    G,cs = all_contigs(d,k)
-    write_GFA2(G,cs,k,d)
+    main()
