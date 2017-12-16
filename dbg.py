@@ -4,6 +4,7 @@
 import argparse
 import collections
 from Bio import Seq, SeqIO, SeqRecord
+import gfapy
 
 #  Create reverse complement
 
@@ -132,47 +133,47 @@ def all_contigs(d,k):
     return G,r
 
 # Check contigs for kmers and get count
-def kmer_count2(cs,d, k, id, file):
-    for x in range(0,len(cs)+1-k):
-        key = cs[x:x+k]
-        # "F 1 * 0 538 1 32 ATGCGCTCGCTCGCTGAGCTGAC A:i:234" 
-        file.write("F\t%s\t%d\t%d\t%d\t%d\t%s\tA:i:%s\n"%(id,0,len(cs),x,x+k,key,d[key][0]))
-        file.write("F\t%s\t%d\t%d\t%d\t%d\t%s\tB:i:%s\n"%(id,0,len(cs),x,x+k,key,d[key][1]))
+# def kmer_count2(cs,d, k, id, file):
+#     for x in range(0,len(cs)+1-k):
+#         key = cs[x:x+k]
+#         # "F 1 * 0 538 1 32 ATGCGCTCGCTCGCTGAGCTGAC A:i:234" 
+#         file.write("F\t%s\t%d\t%d\t%d\t%d\t%s\tA:i:%s\n"%(id,0,len(cs),x,x+k,key,d[key][0]))
+#         file.write("F\t%s\t%d\t%d\t%d\t%d\t%s\tB:i:%s\n"%(id,0,len(cs),x,x+k,key,d[key][1]))
 
 # Check contigs for kmers and get count
-def kmer_count(cs,d, k, id, file):
-    for x in range(0,len(cs)+1-k):
-        key = cs[x:x+k]
-        count = d[key]
-        # write the fragment twice for organism A and maybe B
-        # <fragment> <- F <sid:id> <external:ref> <sbeg:pos> <send:pos> <fbeg:pos> <fend:pos> <alignment> <tag>*
-        file.write("F\t%s\tA:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][0],len(cs),x,x+k,key))
+# def kmer_count(cs,d, k, id, file):
+#     for x in range(0,len(cs)+1-k):
+#         key = cs[x:x+k]
+#         count = d[key]
+#         # write the fragment twice for organism A and maybe B
+#         # <fragment> <- F <sid:id> <external:ref> <sbeg:pos> <send:pos> <fbeg:pos> <fend:pos> <alignment> <tag>*
+#         file.write("F\t%s\tA:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][0],len(cs),x,x+k,key))
         
-        file.write("F\t%s\tB:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][1],len(cs),x,x+k,key))
+#         file.write("F\t%s\tB:%d\t%d\t%d\t%d\t%s\t*\n"%(id,d[key][1],len(cs),x,x+k,key))
 
-# Write to line
-def write_GFA2(G,cs,k,d): 
-    global args
-    if args.output:                                             # If the output file name is given use it
-        filename = args.output
-    else:                                                       # else use standard one
-        filename = "output.gfa"
+# # Write to line
+# def write_GFA2(G,cs,k,d): 
+#     global args
+#     if args.output:                                             # If the output file name is given use it
+#         filename = args.output
+#     else:                                                       # else use standard one
+#         filename = "output.gfa"
         
-    with open(filename, "w+") as file:                          # Open a file
+#     with open(filename, "w+") as file:                          # Open a file
         
-        file.write("H  VN:Z:2.0\n")                             # Write the header with the GFA version
-        for i,x in enumerate(cs):                               # Get the one contig and a number id for the contig
-            file.write("S\t%d\t%d\t%s\t\n"%(i,len(x), x ))      # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
-            kmer_count(x,d,k,i,file)                            # Function to get the fragments of organism A and B if included
+#         file.write("H\tVN:Z:2.0\n")                             # Write the header with the GFA version
+#         for i,x in enumerate(cs):                               # Get the one contig and a number id for the contig
+#             file.write("S\t%d\t%d\t%s\t\n"%(i,len(x), x ))      # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
+#             kmer_count(x,d,k,i,file)                            # Function to get the fragments of organism A and B if included
 
-        for i in G:                                             # Write the links
-            for j,o in G[i][0]:
-                file.write("L\t%d\t+\t%d\t%s\t%dM\n"%(i,j,o,k-1))
-            for j,o in G[i][1]:
-                file.write("L\t%d\t-\t%d\t%s\t%dM\n"%(i,j,o,k-1))
+#         for i in G:                                             # Write the links
+#             for j,o in G[i][0]:
+#                 file.write("L\t%d\t+\t%d\t%s\t%dM\n"%(i,j,o,k-1))
+#             for j,o in G[i][1]:
+#                 file.write("L\t%d\t-\t%d\t%s\t%dM\n"%(i,j,o,k-1))
          
-        for i in d.keys(): 
-            file.write("#\t%s\tRC A:%d B:%d\n"%(i,d[i][0],d[i][1]))      # Print the dictionary with the count of how many times it kmer appears               
+#         for i in d.keys(): 
+#             file.write("#\t%s\tRC A:%d B:%d\n"%(i,d[i][0],d[i][1]))      # Print the dictionary with the count of how many times it kmer appears               
         
 
 # def print_GFA(G,cs,k,d):
@@ -190,6 +191,44 @@ def write_GFA2(G,cs,k,d):
 
 #         for i in d.keys(): 
 #             print("#\t%s\tRC A:%d B:%d"%(i,d[i][0],d[i][1])) 
+
+
+def kmer_count(cs,d, k, id):
+    global g
+    for x in range(0,len(cs)+1-k):
+        key = cs[x:x+k]
+        # print(g.version)
+        # write the fragment twice for organism A and maybe B
+        # <fragment> <- F <sid:id> <external:ref> <sbeg:pos> <send:pos> <fbeg:pos> <fend:pos> <alignment> <tag>*
+        # print(g.version)
+        g.add_line("S\t%s:%sA:%s\t%s"%(id,x,d[key][0],key))
+        
+        g.add_line("S\t%s:%sB:%s\t%s"%(id,x,d[key][1],key))
+
+# Write to line
+def write_GFA2(G,cs,k,d): 
+    global args, g
+    if args.output:                                             # If the output file name is given use it
+        filename = args.output
+    else:                                                       # else use standard one
+        filename = "output.gfa"
+          
+    g.add_line("H\tVN:Z:1.0")                             # Write the header with the GFA version
+    for i,x in enumerate(cs):                               # Get the one contig and a number id for the contig
+        g.add_line("S\t%d\t%s"%(i, x ))      # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
+        kmer_count(x,d,k,i)                            # Function to get the fragments of organism A and B if included
+
+    for i in G:                                             # Write the links
+        for j,o in G[i][0]:
+            g.add_line("L\t%d\t+\t%d\t%s\t%dM"%(i,j,o,k-1))
+        for j,o in G[i][1]:
+            g.add_line("L\t%d\t-\t%d\t%s\t%dM"%(i,j,o,k-1))
+     
+    # for i in d.keys(): 
+    #     g.add_line("#\t%s\tRC A:%d B:%d"%(i,d[i][0],d[i][1]))      # Print the dictionary with the count of how many times it kmer appears               
+    
+    g.to_file(filename)
+
 
 
 
@@ -210,7 +249,7 @@ parser.add_argument("-A", nargs='+', required=True, help="Organism_A_files")
 parser.add_argument("-B", nargs='+', required=True, help="Organism_B_files")
 parser.add_argument("-output",required=False,help="Output GFA file name")
 args = parser.parse_args()
-
+g = gfapy.Gfa()
 
 
 if __name__ == "__main__":
