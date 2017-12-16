@@ -184,6 +184,9 @@ parser.add_argument("-output",required=False,help="Output GFA file name")
 args = parser.parse_args()
 g = gfapy.Gfa()
 
+# To add more organisms add this parser.add_argument("-B", nargs='+', required=True, help="Organism_B_files")
+# change the name and do another call to build and do multiple merge_dicts calls
+
 
 if __name__ == "__main__":
     main()
