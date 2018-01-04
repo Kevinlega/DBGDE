@@ -1,6 +1,7 @@
 # DBGDE
 Using pre-made software trying to implement Mutual software algorithm to get differential expression. 
 
+We will implement GFA1 working copy that will reconstruct the contig with links of it's kmers.
 
 We have:
 - One implementation trying to get GFA2 working at: https://github.com/Omig12/Mutual-pepino
