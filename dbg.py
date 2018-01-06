@@ -1,5 +1,6 @@
 # code taken from https://raw.githubusercontent.com/pmelsted/dbg/master/dbg.py
 # import multiprocessing as mp
+
 import argparse
 import collections
 from Bio import Seq, SeqIO, SeqRecord
@@ -131,20 +132,40 @@ def all_contigs(d,k):
 
     return G,r
 
-def kmer_count(cs,d, k, id):
-    global g
+
+
+
+
+
+
+
+
+
+
+
+def get_kmers_and_link(cs,d, k, s):
+    global g, listofkmers,listoflinks
+    
     for x in range(0,len(cs)+1-k):              #  to get all subsegmet, holds the all the kmers
         key = cs[x:x+k]
-        
-        g.add_line("S\t%s:%s:(A:%s,B:%s)\t%s"%(id,x,d[key][0],d[key][1],key))     # To get kmer for organism A      
+        listofkmers.append("S\t%s:%s:(A:%s,B:%s)\t%s"%(s,x,d[key][0],d[key][1],key))     
 
-        # g.add_line("S\t%s:%sA:%s\t%s"%(id,x,d[key][0],key))     # To get kmer for organism A      
+    for x in range(len(listofkmers)-1):
         
-        # g.add_line("S\t%s:%sB:%s\t%s"%(id,x,d[key][1],key))     # To get kmer gor organism B
+        kmerA = listofkmers[x]
+        kmerB = listofkmers[x+1]
+        kmerA = kmerA.split("\t")
+        kmerB = kmerB.split("\t")
+        kmerA = kmerA[1]
+        kmerB = kmerB[1]
 
-# Write to line
+        listoflinks.append("L\t%s\t+\t%s\t+\t%sM"%(kmerA,kmerB,(k-1)))
+
+        # g.add_line("L\t%d\t+\t%d\t%s\t%dM"%(i,j,o,k-1))          # Put all the links of that segment
+
+
 def write_GFA2(G,cs,k,d): 
-    global args, g
+    global args, g,listofkmers,listoflinks
     if args.output:                                             # If the output file name is given use it
         filename = args.output
     else:                                                       # else use standard one
@@ -152,16 +173,48 @@ def write_GFA2(G,cs,k,d):
           
     g.add_line("H\tVN:Z:1.0")                           # Get the header with the GFA version to the GFA
     for i,x in enumerate(cs):                           # Get the one contig and a number id for the contig
-        g.add_line("S\t%d\t%s"%(i, x ))                 # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
-        kmer_count(x,d,k,i)                             # Function to get the fragments of organism A and B if included
+        # g.add_line("S\t%d\t%s"%(i, x ))               # Write the segment(contig) <segment>  <- S <sid:id> <slen:int> <sequence> <tag>*
+        get_kmers_and_link(x,d,k,i)                     # Function to get the fragments of organism A and B if included
 
-    for i in G:                                             # Get the links to the gfa
-        for j,o in G[i][0]:
-            g.add_line("L\t%d\t+\t%d\t%s\t%dM"%(i,j,o,k-1))
-        for j,o in G[i][1]:
-            g.add_line("L\t%d\t-\t%d\t%s\t%dM"%(i,j,o,k-1))
+    for kmer in listofkmers:
+        g.add_line(kmer)
+    for link in listoflinks:
+        g.add_line(link)
+
+
+    # for i in G:                                                     # Get the links to the gfa
+    #     for j,o in G[i][0]:
+    #         g.add_line("L\t%d\t+\t%d\t%s\t%dM"%(i,j,o,k-1))         #need to change to the 
+    #     for j,o in G[i][1]:
+    #         g.add_line("L\t%d\t-\t%d\t%s\t%dM"%(i,j,o,k-1))
          
     g.to_file(filename)                                     # Write to file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -183,7 +236,8 @@ parser.add_argument("-B", nargs='+', required=True, help="Organism_B_files")
 parser.add_argument("-output",required=False,help="Output GFA file name")
 args = parser.parse_args()
 g = gfapy.Gfa()
-
+listofkmers = []
+listoflinks = []
 # To add more organisms add this parser.add_argument("-B", nargs='+', required=True, help="Organism_B_files")
 # change the name and do another call to build and do multiple merge_dicts calls
 
