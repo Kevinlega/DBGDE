@@ -41,4 +41,4 @@ A.fq: big1.fastq
 	cp big1.fastq A.fq
 
 B.fq: big2.fastq small1.fastq small2.fastq
-	cat big2.fastq small1.fastq small2.fast2 > B.fq
+	cat big2.fastq small1.fastq small2.fastq > B.fq
