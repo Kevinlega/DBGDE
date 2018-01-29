@@ -21,7 +21,7 @@ Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa: Saccharomyces_cerevisiae.R
 	gzip -dc $< > $@ 
 
 I.fa: Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa
-	ln -s Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa I.fa
+	ln -sf Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa I.fa
 
 chrI.gtf: Saccharomyces_cerevisiae.R64-1-1.91.gtf
 	grep "^I	" Saccharomyces_cerevisiae.R64-1-1.91.gtf > chrI.gtf
@@ -34,7 +34,7 @@ chrI-100-20.gtf: chrI-100.gtf
 	head -n 10 chrI-100.gtf > $@
 	tail -n 10 $< >> $@
 
-%.fastq: %.par
+%.fastq: %.par I.fa chrI-100.gtf chrI-100-20.gtf
 	$(FLUX) -p $< -x -l -s
 
 A.fq: big1.fastq
