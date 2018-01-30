@@ -1,0 +1,16 @@
+
+# path to the directory with the genomic sequences,
+# i.e., one fasta file per chromosome/scaffold/contig
+# with a file name corresponding to the identifiers of
+# the first column in the GTF annotation
+#
+GEN_DIR	.
+
+# path to the GTF reference annotation, either absolute
+# or relative to the location of the parameter file
+#
+REF_FILE_NAME	chrI-100-20.gtf
+
+FASTA		true
+ERR_FILE	76
+READ_LENGTH	76

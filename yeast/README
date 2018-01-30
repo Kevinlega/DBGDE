@@ -1,0 +1,31 @@
+Generate some random reads for testing.
+
+Using Yeast genes:
+
+ftp://ftp.ensembl.org/pub/release-91/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa.gz
+ftp://ftp.ensembl.org/pub/release-91/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.91.gtf.gz
+
+gzip -d Sac*.gz
+
+Pick only chromosome I genes for this test.
+
+  578  grep "^I	" Saccharomyces_cerevisiae.R64-1-1.91.gtf > chrI.gtf
+
+Pick a subset. Tried random subsets, but it didn't work
+
+  582  gshuf -n 100 chrI.gtf > chrI-100.gtf
+
+Try head instead.
+
+head -n 104 chrI.gtf > chrI-100.gtf
+
+The gtf file has only chromosome number in column 1, the genome
+filenames have to match this column.
+
+  584  ln -s Saccharomyces_cerevisiae.R64-1-1.dna.chromosome.I.fa I.fa
+
+Run flux simulator
+
+  585  ~/src/dmel/flux-simulator-1.2/bin/flux-simulator -p small1.par -x -l -s
+
+
