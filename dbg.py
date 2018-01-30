@@ -198,9 +198,9 @@ def write_GFA2(G,cs,k,d):
 def main():
     global args
 
-    dA = build(args.A, args.k, 1)
+    dA = build(args.A, args.k, 0)
     
-    dB = build(args.B, args.k, 1)
+    dB = build(args.B, args.k, 0)
     d = merge_dicts(dA, dB)
     G,cs = all_contigs(d,args.k)
     write_GFA2(G,cs,args.k,d)
