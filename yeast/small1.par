@@ -14,3 +14,6 @@ REF_FILE_NAME	chrI-100-20.gtf
 FASTA		true
 ERR_FILE	76
 READ_LENGTH	76
+
+# Make fewer reads
+READ_NUMBER  20000
