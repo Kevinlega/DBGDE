@@ -139,7 +139,7 @@ def get_links(cs,d,k,s,fd):
         keyB = cs[(x+1):(x+1)+k]
         
         kmerA = (('%s:%s:(A:%s,B:%s)')%(s,x,d[keyA][0],d[keyA][1]))
-        kmerB = (('%s:%s:(A:%s,B:%s)')%(s,x,d[keyB][0],d[keyB][1]))
+        kmerB = (('%s:%s:(A:%s,B:%s)')%(s,x+1,d[keyB][0],d[keyB][1]))
 
         fd.write("L\t%s\t+\t%s\t+\t%sM\n"%(kmerA,kmerB,(k-1)))
 
