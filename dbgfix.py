@@ -149,7 +149,7 @@ def get_kmers(cs,d, k, s,fd):
     for x in range(0,len(cs)+1-k):              #  to get all subsegmet, holds the all the kmers
         key = cs[x:x+k]
         fd.write("S\t%s:%s:(A:%s,B:%s)\t%s\n"%(s,x,d[key][0],d[key][1],key))
-        lastkmerid[s] = (('%s:%s:(A:%s,B:%s)')%(s,x,d[keyA][0],d[keyA][1]))
+        lastkmerid[s] = (('%s:%s:(A:%s,B:%s)')%(s,x,d[key][0],d[key][1]))
 
 def write_GFA2(G,cs,k,d,fd): 
     global args, g,listofkmers, listoflinks,lastkmerid    
