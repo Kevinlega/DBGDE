@@ -41,14 +41,15 @@ def positive(C):
 def main():
     global C,args
     #maybe clean all the unnatached segments
+    segments_link = {}
+    dummy = os.path.join("Parser_Output",'dummy.gfa')
     filename = os.path.join("Parser_Output",args.output)
-    with open(filename,'w') as output:
+    with open(dummy,'w') as output:
         with open(args.f,'r') as file:
             for line in file:
                 line_split = line.split()
-                if line_split[0] == 'S':
-                    output.write(line)
-                elif line_split[0] == 'L':
+                if line_split[0] == 'L':
+
                     kA = line_split[1].split("A:")
                     kA = kA[1]
                     kA = kA.split(',B:')
@@ -61,9 +62,29 @@ def main():
                     coverageB = abs(int(kB[0]) - int(kB[1]))
                     DifEx = (coverageA + coverageB)/2
                     if DifEx >= C:
+                        segments_link[line_split[1]] = None
+                        segments_link[line_split[3]] = None
                         output.write("L\t%s\t%s\t%s\t%s\t%s\tKC:i:%d\n"%(line_split[1],line_split[2],line_split[3],line_split[4],line_split[5],int(DifEx)))
+
+                elif line_split[0] == 'S':
+                    output.write(line)
                 elif line_split[0] == 'H':
                     output.write(line)
+
+    with open(filename,'w') as output:
+        with open(dummy,'r') as file:
+            for line in file:
+                line_split = line.split()
+                if line_split[0] == 'S':
+                    if line_split[1] in segments_link:
+                        output.write(line)
+                elif line_split[0] == 'L':
+                    output.write(line)
+                elif line_split[0] == 'H':
+                    output.write(line)
+
+    del segments_link
+    os.remove(dummy)
 
 
 parser = argparse.ArgumentParser(description="Creates a GFA file with one or two organisms given a kmer size. \
