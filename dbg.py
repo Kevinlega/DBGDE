@@ -52,6 +52,7 @@ def build(fn,k=31,limit=1):
 
     return d
 
+# merges the organisms data
 def merge_dicts(d1,d2):
     merge = {}
     for i in d1.keys():
@@ -60,12 +61,12 @@ def merge_dicts(d1,d2):
         merge[i] = (d1[i], d2[i])
     return merge
 
-# 
+# Taken from source code 
 def contig_to_string(c):
     return c[0] + ''.join(x[-1] for x in c[1:])
 
 
-# we will work here today 
+# Taken from source code 
 def get_contig(d,km):
     c_fw = get_contig_forward(d,km)
     
@@ -77,7 +78,7 @@ def get_contig(d,km):
         c = [twin(x) for x in c_bw[-1:0:-1]] + c_fw
     return contig_to_string(c),c
         
-# And here
+# Taken from source code 
 def get_contig_forward(d,km):
     c_fw = [km]
     
@@ -98,7 +99,7 @@ def get_contig_forward(d,km):
 
     return c_fw
 
-
+# Taken from source code 
 def all_contigs(d,k):
     done = set()
     r = []
@@ -132,7 +133,7 @@ def all_contigs(d,k):
                 G[i][1].append(tails[z])
 
     return G,r
-    
+# Outputs the links of each node.   
 def get_links(cs,d,k,s,fd):
     for x in range(0,len(cs)-k):
         keyA = cs[x:x+k]
@@ -142,7 +143,7 @@ def get_links(cs,d,k,s,fd):
         kmerB = (('%s:%s:(A:%s,B:%s)')%(s,x+1,d[keyB][0],d[keyB][1]))
 
         fd.write("L\t%s\t+\t%s\t+\t%sM\n"%(kmerA,kmerB,(k-1)))
-
+# Outputs the Segment chunks of each node.  
 def get_kmers(cs,d, k, s,fd):
     global g, listofkmers,listoflinks,lastkmerid
 
